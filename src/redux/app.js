@@ -20,6 +20,8 @@ import { createSlice } from '@reduxjs/toolkit';
 const initialState = {
   darkMode: false,
   currentPageName: 'Video Submission Form',
+  signedUrl: null,
+  submissionId: null
 }
 
 const appSlice = createSlice({
@@ -31,13 +33,21 @@ const appSlice = createSlice({
         },
         setCurrentPageName (state, action) {
           state.currentPageName = action.payload;
+        },
+        setSignedUrl (state, action) {
+          state.signedUrl = action.payload;
+        },
+        setSubmissionId (state, action) {
+          state.submissionId = action.payload;
         }
     }
 });
 
 export const {
     setDarkMode,
-    setCurrentPageName
+    setCurrentPageName,
+    setSignedUrl,
+    setSubmissionId
 } = appSlice.actions;
 
 export default appSlice.reducer;
