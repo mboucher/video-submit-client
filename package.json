@@ -1,0 +1,27 @@
+{
+  "name": "video-submit-client",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/mboucher/video-submit-client.git",
+  "author": "Marcel Boucher <mboucher@adobe.com>",
+  "license": "MIT",
+  "scripts": {
+    "start": "parcel src/index.html --https --cert ./dev/certs/server.crt --key ./dev/certs/server.key --host localhost.corp.adobe.com -p 8443 --open"
+  },
+  "dependencies": {
+    "@adobe/react-spectrum": "^3.34.1",
+    "@react-spectrum/dropzone": "^3.0.0-rc.3",
+    "@react-spectrum/toast": "^3.0.0-beta.10",
+    "@reduxjs/toolkit": "^2.2.1",
+    "@spectrum-icons/illustrations": "^3.6.11",
+    "@spectrum-icons/workflow": "^4.2.10",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-redux": "^9.1.0",
+    "react-router-dom": "^6.22.3"
+  },
+  "devDependencies": {
+    "parcel": "^2.12.0",
+    "parcel-bundler": "^1.12.5"
+  }
+}
