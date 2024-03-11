@@ -1,0 +1,681 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_excelonlinebusiness": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "dmeexp_sharedexcelonlinebusiness_21204"
+        },
+        "api": {
+          "name": "shared_excelonlinebusiness"
+        }
+      },
+      "shared_azureblob-2": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "new_sharedazureblob_363ba"
+        },
+        "api": {
+          "name": "shared_azureblob"
+        }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        }
+      },
+      "triggers": {
+        "manual": {
+          "metadata": {
+            "operationMetadataId": "b9dfdb4c-18e6-408d-8e4d-14d2b4d9302f"
+          },
+          "type": "Request",
+          "kind": "Http",
+          "inputs": {
+            "triggerAuthenticationType": "All",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "action": {
+                  "type": "string"
+                },
+                "payload": {
+                  "type": "object",
+                  "properties": {
+                    "firstName": {
+                      "type": "string"
+                    },
+                    "lastName": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "submissionId": {
+                      "type": "string"
+                    },
+                    "location": {
+                      "type": "object",
+                      "properties": {
+                        "country": {
+                          "type": "string"
+                        },
+                        "state": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "consent": {
+                      "type": "boolean"
+                    },
+                    "file": {
+                      "type": "object",
+                      "properties": {
+                        "fileName": {
+                          "type": "string"
+                        },
+                        "contentType": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "actions": {
+        "Validate_API_Key": {
+          "actions": {},
+          "runAfter": {
+            "Define_API_Key": [
+              "Succeeded"
+            ]
+          },
+          "else": {
+            "actions": {
+              "403_Response": {
+                "metadata": {
+                  "operationMetadataId": "3ebec370-9bef-4658-a60e-1f55526411a7"
+                },
+                "type": "Response",
+                "kind": "Http",
+                "inputs": {
+                  "statusCode": 403,
+                  "headers": {
+                    "Content-Type": "application/json"
+                  },
+                  "body": {
+                    "error": "Forbidden, invalid API Key"
+                  }
+                }
+              },
+              "Terminate_403": {
+                "runAfter": {
+                  "403_Response": [
+                    "Succeeded"
+                  ]
+                },
+                "metadata": {
+                  "operationMetadataId": "567cedfb-55d6-42c9-8d42-aabda7b24358"
+                },
+                "type": "Terminate",
+                "inputs": {
+                  "runStatus": "Failed",
+                  "runError": {
+                    "code": "403",
+                    "message": "Forbidden Access"
+                  }
+                }
+              }
+            }
+          },
+          "expression": {
+            "equals": [
+              "@triggerOutputs()?['headers']?['X-API-Key']",
+              "@variables('apiKey')"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "080750b7-a1a9-4edc-8b9c-40471ad7cfac"
+          },
+          "type": "If"
+        },
+        "Define_API_Key": {
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "2d4b7a7c-38f9-4546-a241-c022b6249451"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "apiKey",
+                "type": "string",
+                "value": "0c71096a-e7c6-446e-be22-fa6e72334dba"
+              }
+            ]
+          }
+        },
+        "Select_Action": {
+          "runAfter": {
+            "Initialize_submissionId": [
+              "Succeeded"
+            ]
+          },
+          "cases": {
+            "Stage_Form_Draft": {
+              "case": "exp.draftSubmit",
+              "actions": {
+                "Validate_Draft_Payload": {
+                  "actions": {},
+                  "else": {
+                    "actions": {
+                      "Bad_Draft_Payload": {
+                        "metadata": {
+                          "operationMetadataId": "639ee9f5-2345-46b9-a9a4-f63fd29c6434"
+                        },
+                        "type": "Response",
+                        "kind": "Http",
+                        "inputs": {
+                          "statusCode": 400,
+                          "headers": {
+                            "Content-Type": "application/json"
+                          },
+                          "body": {
+                            "error": "Bad Request: Payload is malformed"
+                          }
+                        }
+                      },
+                      "Terminate_400_Draft": {
+                        "runAfter": {
+                          "Bad_Draft_Payload": [
+                            "Succeeded"
+                          ]
+                        },
+                        "metadata": {
+                          "operationMetadataId": "083de0f7-f633-4fcf-8ade-e46bd7578e33"
+                        },
+                        "type": "Terminate",
+                        "inputs": {
+                          "runStatus": "Failed",
+                          "runError": {
+                            "code": "400",
+                            "message": "Bad draft submission payload"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "expression": {
+                    "and": [
+                      {
+                        "equals": [
+                          "@contains(variables('validations'), triggerBody()?['payload']?['firstName'])",
+                          "@false"
+                        ]
+                      },
+                      {
+                        "equals": [
+                          "@contains(variables('validations'), triggerBody()?['payload']?['lastName'])",
+                          "@false"
+                        ]
+                      },
+                      {
+                        "equals": [
+                          "@contains(variables('validations'), triggerBody()?['payload']?['email'])",
+                          "@false"
+                        ]
+                      },
+                      {
+                        "equals": [
+                          "@contains(variables('validations'), triggerBody()?['payload']?['location']?['country'])",
+                          "@false"
+                        ]
+                      },
+                      {
+                        "equals": [
+                          "@contains(variables('validations'), triggerBody()?['payload']?['location']?['state'])",
+                          "@false"
+                        ]
+                      },
+                      {
+                        "equals": [
+                          "@contains(variables('validations'), triggerBody()?['payload']?['consent'])",
+                          "@false"
+                        ]
+                      }
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "d844a32d-a57c-4ba9-8b71-9484783aa02b"
+                  },
+                  "type": "If"
+                },
+                "Add_a_row_into_a_table": {
+                  "runAfter": {
+                    "Validate_Draft_Payload": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "01UL4LST7ZGNKLZI7XC5G2U4U7C4ZQNH7A": "/Video Upload Submission.xlsx",
+                    "operationMetadataId": "ed1b116a-e27d-47c7-bbb6-2028e804f969",
+                    "tableId": "{7AFBFB32-9921-41D5-B7ED-287C23DBF789}"
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "source": "me",
+                      "drive": "b!5dd0uq1-tkKNe1aq3eSIlhbpMAylfuNMvj9wM5JFcwtw93zg7q2USp1Q-MBUEYR3",
+                      "file": "01UL4LST7ZGNKLZI7XC5G2U4U7C4ZQNH7A",
+                      "table": "{7AFBFB32-9921-41D5-B7ED-287C23DBF789}",
+                      "item/First Name": "@triggerBody()?['payload']?['firstName']",
+                      "item/Last Name": "@triggerBody()?['payload']?['lastName']",
+                      "item/Email": "@triggerBody()?['payload']?['email']",
+                      "item/Country": "@triggerBody()?['payload']?['location']?['country']",
+                      "item/State or Province": "@triggerBody()?['payload']?['location']?['state']",
+                      "item/Consent": "@triggerBody()?['payload']?['consent']",
+                      "item/Submission ID": "@variables('submissionId')",
+                      "item/Asset Link": "@{concat('https://exioffstrainingdata.blob.core.windows.net/videoapi/', triggerBody()?['payload']?['email'])}",
+                      "item/Status": "@triggerBody()?['action']"
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
+                      "operationId": "AddRowV2",
+                      "connectionName": "shared_excelonlinebusiness"
+                    }
+                  }
+                },
+                "Response_Draft": {
+                  "runAfter": {
+                    "Add_a_row_into_a_table": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "20aef9bf-fe66-42e5-a770-e014847f7693"
+                  },
+                  "type": "Response",
+                  "kind": "Http",
+                  "inputs": {
+                    "statusCode": 200,
+                    "headers": {
+                      "Content-Type": "application/json"
+                    },
+                    "body": {
+                      "success": true,
+                      "submissionId": "@{variables('submissionId')}"
+                    }
+                  }
+                }
+              }
+            },
+            "Finalize_Submission": {
+              "case": "exp.complete",
+              "actions": {
+                "Validate_Final_Payload": {
+                  "actions": {},
+                  "else": {
+                    "actions": {
+                      "Bad_Final_Payload": {
+                        "metadata": {
+                          "operationMetadataId": "639ee9f5-2345-46b9-a9a4-f63fd29c6434"
+                        },
+                        "type": "Response",
+                        "kind": "Http",
+                        "inputs": {
+                          "statusCode": 400,
+                          "headers": {
+                            "Content-Type": "application/json"
+                          },
+                          "body": {
+                            "error": "Bad Request: Payload is malformed"
+                          }
+                        }
+                      },
+                      "Terminate_Final_Payload": {
+                        "runAfter": {
+                          "Bad_Final_Payload": [
+                            "Succeeded"
+                          ]
+                        },
+                        "metadata": {
+                          "operationMetadataId": "083de0f7-f633-4fcf-8ade-e46bd7578e33"
+                        },
+                        "type": "Terminate",
+                        "inputs": {
+                          "runStatus": "Failed",
+                          "runError": {
+                            "code": "400",
+                            "message": "Bad Payload"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "expression": {
+                    "and": [
+                      {
+                        "equals": [
+                          "@contains(variables('validations'), triggerBody()?['payload']?['submissionId'])",
+                          "@false"
+                        ]
+                      }
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "d844a32d-a57c-4ba9-8b71-9484783aa02b"
+                  },
+                  "type": "If"
+                },
+                "Update_a_row": {
+                  "runAfter": {
+                    "Validate_Final_Payload": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "01UL4LST7ZGNKLZI7XC5G2U4U7C4ZQNH7A": "/Video Upload Submission.xlsx",
+                    "operationMetadataId": "1e9b1a17-e963-47da-a2e2-f7e52c40b83a",
+                    "tableId": "{7AFBFB32-9921-41D5-B7ED-287C23DBF789}"
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "source": "me",
+                      "drive": "b!5dd0uq1-tkKNe1aq3eSIlhbpMAylfuNMvj9wM5JFcwtw93zg7q2USp1Q-MBUEYR3",
+                      "file": "01UL4LST7ZGNKLZI7XC5G2U4U7C4ZQNH7A",
+                      "table": "{7AFBFB32-9921-41D5-B7ED-287C23DBF789}",
+                      "idColumn": "Submission ID",
+                      "id": "@triggerBody()?['payload']?['submissionId']",
+                      "item/Status": "@triggerBody()?['action']"
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
+                      "operationId": "PatchItem",
+                      "connectionName": "shared_excelonlinebusiness"
+                    }
+                  }
+                },
+                "Response_Final": {
+                  "runAfter": {
+                    "Update_a_row": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "04d35761-f582-42d7-a4c4-8d2558a9708d"
+                  },
+                  "type": "Response",
+                  "kind": "Http",
+                  "inputs": {
+                    "statusCode": 200,
+                    "headers": {
+                      "Content-Type": "application/json"
+                    },
+                    "body": {
+                      "success": true
+                    }
+                  }
+                }
+              }
+            },
+            "Request_Upload_URL": {
+              "case": "exp.requestUrl",
+              "actions": {
+                "Create_blob_(V2)": {
+                  "runAfter": {
+                    "Get_a_row": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "dataset": "AccountNameFromSettings",
+                      "folderPath": "@concat('/videoapi/', body('Get_a_row')?['Email'])",
+                      "name": "@triggerBody()?['payload']?['file']?['fileName']",
+                      "body": "@null",
+                      "Content-Type": "@triggerBody()?['payload']?['file']?['contentType']"
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_azureblob",
+                      "operationId": "CreateFile_V2",
+                      "connectionName": "shared_azureblob-2"
+                    }
+                  }
+                },
+                "Create_SAS_URI_by_path_(V2)": {
+                  "runAfter": {
+                    "Create_blob_(V2)": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "0f51229f-5506-4692-ad0a-ac26f9f18d7f"
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "storageAccountName": "AccountNameFromSettings",
+                      "path": "@outputs('Create_blob_(V2)')?['body/Path']",
+                      "policy/Permissions": "Write",
+                      "policy/AccessProtocol": "HttpsOnly"
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_azureblob",
+                      "operationId": "CreateShareLinkByPath_V2",
+                      "connectionName": "shared_azureblob-2"
+                    }
+                  }
+                },
+                "Response_URL": {
+                  "runAfter": {
+                    "Create_SAS_URI_by_path_(V2)": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Response",
+                  "kind": "Http",
+                  "inputs": {
+                    "statusCode": 200,
+                    "headers": {
+                      "Content-Type": "application/json"
+                    },
+                    "body": {
+                      "success": true,
+                      "uploadUrl": "@{outputs('Create_SAS_URI_by_path_(V2)')?['body/WebUrl']}"
+                    }
+                  }
+                },
+                "Validate_Request_Payload": {
+                  "actions": {},
+                  "else": {
+                    "actions": {
+                      "Bad_URL_Request": {
+                        "type": "Response",
+                        "kind": "Http",
+                        "inputs": {
+                          "statusCode": 400,
+                          "headers": {
+                            "Content-Type": "application/json"
+                          },
+                          "body": {
+                            "error": "Bad Request: URL request payload is malformed."
+                          }
+                        }
+                      },
+                      "Terminate_400_URL": {
+                        "runAfter": {
+                          "Bad_URL_Request": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "Terminate",
+                        "inputs": {
+                          "runStatus": "Failed",
+                          "runError": {
+                            "code": "400",
+                            "message": "Bad URL request payload"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "expression": {
+                    "and": [
+                      {
+                        "equals": [
+                          "@contains(variables('validations'), triggerBody()?['payload']?['submissionId'])",
+                          "@false"
+                        ]
+                      },
+                      {
+                        "equals": [
+                          "@contains(variables('validations'), triggerBody()?['payload']?['file']?['fileName'])",
+                          "@false"
+                        ]
+                      },
+                      {
+                        "equals": [
+                          "@contains(variables('validations'), triggerBody()?['payload']?['file']?['contentType'])",
+                          "@false"
+                        ]
+                      }
+                    ]
+                  },
+                  "type": "If"
+                },
+                "Get_a_row": {
+                  "runAfter": {
+                    "Validate_Request_Payload": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "01UL4LST7ZGNKLZI7XC5G2U4U7C4ZQNH7A": "/Video Upload Submission.xlsx",
+                    "tableId": "{7AFBFB32-9921-41D5-B7ED-287C23DBF789}"
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "source": "me",
+                      "drive": "b!5dd0uq1-tkKNe1aq3eSIlhbpMAylfuNMvj9wM5JFcwtw93zg7q2USp1Q-MBUEYR3",
+                      "file": "01UL4LST7ZGNKLZI7XC5G2U4U7C4ZQNH7A",
+                      "table": "{7AFBFB32-9921-41D5-B7ED-287C23DBF789}",
+                      "idColumn": "Submission ID",
+                      "id": "@triggerBody()?['payload']?['submissionId']"
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
+                      "operationId": "GetItem",
+                      "connectionName": "shared_excelonlinebusiness"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "actions": {
+              "Bad_Request": {
+                "metadata": {
+                  "operationMetadataId": "618b3d11-7616-4c17-8dc3-e6e3b150ccc3"
+                },
+                "type": "Response",
+                "kind": "Http",
+                "inputs": {
+                  "statusCode": 400,
+                  "headers": {
+                    "Content-Type": "application/json"
+                  },
+                  "body": {
+                    "error": "Bad Request: @{triggerBody()?['action']}is not supported"
+                  }
+                }
+              },
+              "Terminate_400_Action": {
+                "runAfter": {
+                  "Bad_Request": [
+                    "Succeeded"
+                  ]
+                },
+                "metadata": {
+                  "operationMetadataId": "d2b131f2-2a63-467d-9a05-2e81e645e2dd"
+                },
+                "type": "Terminate",
+                "inputs": {
+                  "runStatus": "Failed",
+                  "runError": {
+                    "code": "400",
+                    "message": "Bad action requested"
+                  }
+                }
+              }
+            }
+          },
+          "expression": "@triggerBody()?['action']",
+          "metadata": {
+            "operationMetadataId": "e2ecba71-b2e9-43fa-b4e1-391b088eb427"
+          },
+          "type": "Switch"
+        },
+        "Initialize_validator": {
+          "runAfter": {
+            "Validate_API_Key": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "577aaf87-2d57-409d-ace1-ffa2a45ce4de"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "validations",
+                "type": "array",
+                "value": "@createArray(null, '')"
+              }
+            ]
+          }
+        },
+        "Initialize_submissionId": {
+          "runAfter": {
+            "Initialize_validator": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "e0835575-2646-4e75-b0dc-d995d85d2024"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "submissionId",
+                "type": "string",
+                "value": "@{base64(concat(triggerBody()?['payload']?['email'], utcNow()))}"
+              }
+            ]
+          }
+        }
+      },
+      "outputs": {}
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}
