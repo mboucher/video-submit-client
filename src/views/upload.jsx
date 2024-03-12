@@ -16,56 +16,113 @@
 **************************************************************************/
 
 
-import React from 'react';
+import React, {useEffect} from 'react';
 import {  
     Flex, 
     Heading, 
     IllustratedMessage, 
     Text, 
-    Image,
-    View
+    View,
+    ProgressBar,
+    Image
 } from '@adobe/react-spectrum';
 import Upload from '@spectrum-icons/illustrations/Upload';
 import { DropZone } from '@react-spectrum/dropzone';
+import { ToastQueue } from '@react-spectrum/toast';
+import { uploadVideoFile } from '../services/BlobStorageService';
+import { useSelector, useDispatch } from 'react-redux';
+import { setCurrentPageName, setSignedUrl } from '../redux/app';
+import { completeSubmission, getSignedUrl } from '../services/PAFlowService';
+import ThankYou from '../../public/ThankYou.svg';
 
-const DragAndDrop = ({onImageDrop}) => {
+const DragAndDrop = () => {
+    const signedUrl = useSelector((state) => state.app.signedUrl);
+    const submissionId = useSelector((state) => state.app.submissionId);
+    const dispatch = useDispatch();
+
     const [filledSrc, setFilledSrc] = React.useState(null);
+    const [progress, setProgress] = React.useState(0);
+    const [uploadComplete, setUploadComplete] = React.useState(false);
+
+    useEffect(() => {
+        dispatch(setCurrentPageName('Video Upload'));
+    },[]);
+
+
+    const handleFileUpload = async (file) => {
+        try {
+            const result = await getSignedUrl(submissionId, file);
+            const url = result.data.uploadUrl;
+            dispatch(setSignedUrl(url));
+            await uploadVideoFile(file,url,onProgressEvent);
+        } catch (err) {
+            setFilledSrc(null);
+            ToastQueue.negative(`Upload ERROR: ${err.message}`);
+        }
+    }
 
     const handleObjectDrop = (images) => {
         images.items.find(async (item) => {
             if(item.kind === 'file') {
-                if(item.type === 'image/jpeg' || item.type === 'image/png') {
+                if(item.type === 'video/mp4') {
                     const file = await item.getFile();
                     setFilledSrc(URL.createObjectURL(file));
-                    onImageDrop(file);
+                    handleFileUpload(file);
                 } 
             } else {
+                ToastQueue.negative('You can only uploads video files.')
                 return;
             }
         });
     }
 
+    const onProgressEvent = async (progressEvent) => {
+        const currentProgress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+        setProgress(currentProgress);
+        if(currentProgress === 100) {
+            await completeSubmission(submissionId);
+            setUploadComplete(true);
+        }
+
+    }
+
     return (
         <View padding={'size-450'} >
-            <Flex direction={'column'} gap={30} height={'100%'}>
-                <Heading level={2}>Upload your Video Files</Heading>
-                <DropZone
-                    isFilled={!!filledSrc}
-                    getDropOperation={(types) => {
-                        return types.has('image/jpeg') || types.has('image/png') ? 'copy' : 'cancel';
-                    }}
-                    onDrop={(e)=> handleObjectDrop(e)}>
-                        {filledSrc
-                        ? <Image src={filledSrc}/>
-                        : (<IllustratedMessage>
-                            <Upload />
-                            <Heading level={3}>
-                                <Text>Drag and drop your videos here.</Text>
-                            </Heading>
-                        </IllustratedMessage>
-                        )}
-                    </DropZone>
-            </Flex>
+            {uploadComplete ? 
+                <Flex direction={'column'} alignItems={'center'}>
+                    <Image src={ThankYou} width={'75%'}/>
+                    <Heading level={1}>Your file has been successfully saved.</Heading>
+                </Flex>
+            :
+                
+            <Flex direction={'column'} width={'100%'} alignItems={'center'}>
+                <Flex direction={'column'} gap={30} height={'100%'} width={'40%'}>
+                    <Heading level={2}>Upload your Video Files</Heading>
+                    <DropZone
+                        isFilled={!!filledSrc}
+                        getDropOperation={(types) => {
+                            return types.has('video/mp4')  ? 'copy' : 'cancel';
+                        }}
+                        onDrop={(e)=> handleObjectDrop(e)}>
+                            {filledSrc
+                            ? 
+                            <Flex direction={'column'} gap={'size-100'} alignItems={'center'}>
+                                <Heading>Uploading your file. Please wait...</Heading>
+                                <ProgressBar size='L' value={progress}/>
+                            </Flex>
+                            
+                            : (<IllustratedMessage>
+                                <Upload />
+                                <Heading level={3}>
+                                    <Text>Drag and drop your videos here.</Text>
+                                </Heading>
+                            </IllustratedMessage>
+                            )}
+                        </DropZone>
+                </Flex>
+                </Flex>
+            }
+            
         </View>
     );
 }
