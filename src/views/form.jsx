@@ -25,6 +25,8 @@ import { setCurrentPageName, setSignedUrl, setSubmissionId } from '../redux/app'
 import {setFirstName, setLastName, setConsent, setCountry, setEmail, setState} from '../redux/form';
 import { states } from '../utils/data';
 
+import contentMd from '../content/contentrequest.md';
+
 
 const SubmissionForm = () => {
     const submissionId = useSelector((state) => state.app.submissionId);
@@ -36,6 +38,9 @@ const SubmissionForm = () => {
     const state = useSelector((state) => state.form.location.state);
     const consent = useSelector((state) => state.form.consent);
 
+    const [content, setContent] = useState('');
+
+
     const [isWorking, setIsWorking] = useState(false);
     const [isValid, setIsValid] = useState(false);
 
@@ -46,6 +51,10 @@ const SubmissionForm = () => {
 
     useEffect(() =>{
         dispatch(setCurrentPageName('Video Submission Form'))
+
+        fetch(contentMd).then((response) => response.text()).then((text) => {
+            setContent(text)
+        })
     },[]);
 
 
@@ -101,8 +110,10 @@ const SubmissionForm = () => {
         <View padding={'size-400'} width={'100%'}>
             <Flex direction={'column'} width={'100%'} alignItems={'center'}>
             <Flex direction={'column'} gap={'size-250'} width={'40%'}>
+                <Text>
+                    <div dangerouslySetInnerHTML={{ __html: content }} />
+                </Text>
                 <Heading>Enter your information</Heading>
-                <Text>This is place holder text to explain whay we're asking for video submissions. What the submissions will be used for etc.</Text>
                 <Flex direction={'row'} wrap gap={'size-100'}>
                     <TextField label='First Name' isRequired onChange={(val) => dispatch(setFirstName(val))} defaultValue={firstName}></TextField>
                     <TextField label='Last Name' isRequired onChange={(val) => dispatch(setLastName(val))} defaultValue={lastName}></TextField>
