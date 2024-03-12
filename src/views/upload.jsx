@@ -90,7 +90,7 @@ const DragAndDrop = () => {
         <View padding={'size-450'} >
             {uploadComplete ? 
                 <Flex direction={'column'} alignItems={'center'}>
-                    <Image src={ThankYou} width={'75%'}/>
+                    <Image src={ThankYou} width={'50%'}/>
                     <Heading level={1}>Your file has been successfully saved.</Heading>
                 </Flex>
             :
