@@ -15,15 +15,15 @@
  * from Adobe.
 **************************************************************************/
 
-import { Flex, TextField, Picker, Item, Button, Heading, View, Switch, ProgressCircle, Text } from '@adobe/react-spectrum';
+import { Flex, TextField, Picker, Item, Button, Heading, View, Switch, ProgressCircle, Text, ContextualHelp, Content } from '@adobe/react-spectrum';
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from 'react-redux';
 import { initializeSubmission } from '../services/PAFlowService';
 import React, { useEffect, useState } from 'react';
 import { ToastQueue } from '@react-spectrum/toast';
 import { setCurrentPageName, setSignedUrl, setSubmissionId } from '../redux/app';
-import {setFirstName, setLastName, setConsent, setCountry, setEmail, setState} from '../redux/form';
-import { states } from '../utils/data';
+import {setFirstName, setLastName, setCertification, setCountry, setEmail, setState} from '../redux/form';
+import { states, countries } from '../utils/data';
 
 import contentMd from '../content/contentrequest.md';
 
@@ -36,10 +36,9 @@ const SubmissionForm = () => {
     const email = useSelector((state) => state.form.email);
     const country = useSelector((state) => state.form.location.country);
     const state = useSelector((state) => state.form.location.state);
-    const consent = useSelector((state) => state.form.consent);
+    const certification = useSelector((state) => state.form.certification);
 
     const [content, setContent] = useState('');
-
 
     const [isWorking, setIsWorking] = useState(false);
     const [isValid, setIsValid] = useState(false);
@@ -59,8 +58,8 @@ const SubmissionForm = () => {
 
 
     const validateFields = () => {
-        if(firstName === null || lastName === null || email === null || state === null) {
-            ToastQueue.negative('All fields are required.', {timeout:5000});
+        if(firstName === null || lastName === null || email === null || country === null || state === null || !certification) {
+            ToastQueue.negative('All fields and certification are required.', {timeout:5000});
             return false;
         } else {
             return true;
@@ -78,34 +77,9 @@ const SubmissionForm = () => {
             navigate('/upload');
         }
 
-        try {
-            setIsWorking(true);
-            const params = {
-                firstName: firstName,
-                lastName: lastName,
-                email: email,
-                location: {
-                    country: country,
-                    state: state
-                },
-                consent: consent
-            }
-            const response = await initializeSubmission(params);
-            if(response.status === 200) {
-                dispatch(setSignedUrl(response.data.uploadUrl));
-                dispatch(setSubmissionId(response.data.submissionId));
-                navigate('/upload');
-            } else {
-                throw new Error('Unable to initialize submission');
-            }
-        } catch (e) {
-            console.error(e);
-            ToastQueue.negative(`Form Error: ${e.message}`, {timeout: 5000})
-        } finally {
-            setIsWorking(false);
-        }
-       
+        navigate('/terms');       
     }
+
     return(
         <View padding={'size-400'} width={'100%'}>
             <Flex direction={'column'} width={'100%'} alignItems={'center'}>
@@ -117,11 +91,31 @@ const SubmissionForm = () => {
                 <Flex direction={'row'} wrap gap={'size-100'}>
                     <TextField label='First Name' isRequired onChange={(val) => dispatch(setFirstName(val))} defaultValue={firstName}></TextField>
                     <TextField label='Last Name' isRequired onChange={(val) => dispatch(setLastName(val))} defaultValue={lastName}></TextField>
-                    <TextField label='Email' isRequired onChange={(val) => dispatch(setEmail(val))} defaultValue={email}></TextField>
-                    <Picker label='State' isRequired onSelectionChange={(val) => dispatch(setState(val))} items={states} defaultSelectedKey={state} disabledKeys={disabledStateKeys}>
+                    <TextField label='Adobe Email' isRequired onChange={(val) => dispatch(setEmail(val))} defaultValue={email} type='email'
+                        contextualHelp={
+                            <ContextualHelp>
+                              <Content>
+                                In order for your submission to be valid, we will need to verify that you are an Adobe employee.
+                              </Content>
+                            </ContextualHelp>
+                          }
+                    
+                    ></TextField>
+                    <Picker label='Country' isRequired onSelectionChange={(val) => dispatch(setCountry(val))} items={countries} defaultSelectedKey={country}>
                         {(item) => <Item key={item.id}>{item.name}</Item>}
                     </Picker>
-                    <Switch isRequired onChange={(val) => dispatch(setConsent(val))} isSelected={consent}>I consent to everything I am asked.</Switch>
+                    <Picker label='State' isRequired onSelectionChange={(val) => dispatch(setState(val))} items={states} defaultSelectedKey={state} disabledKeys={disabledStateKeys}
+                        contextualHelp={
+                            <ContextualHelp>
+                              <Content>
+                                Submissions are not currently accepted in {disabledStateKeys.join(', ')}.
+                              </Content>
+                            </ContextualHelp>
+                          }
+                    >
+                        {(item) => <Item key={item.id}>{item.name}</Item>}
+                    </Picker>
+                    <Switch isRequired onChange={(val) => dispatch(setCertification(val))} isSelected={certification} width={'100%'}>I certify that the information provided is accurate.</Switch>
                 </Flex>
                 
                 <Button variant='cta' width={'size-1200'} onPress={handleContinue}>
@@ -130,7 +124,6 @@ const SubmissionForm = () => {
                     : 
                         <Text>Continue</Text>
                     }
-                
                 </Button>
             </Flex>
             </Flex>

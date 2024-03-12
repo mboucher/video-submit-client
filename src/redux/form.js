@@ -25,7 +25,8 @@ const initialState = {
     "country": "US",
     "state": null
   },
-  "consent":false
+  "consent":false,
+  "certification": false
 }
 
 const appSlice = createSlice({
@@ -49,6 +50,9 @@ const appSlice = createSlice({
         },
         setConsent (state, action) {
           state.consent = action.payload;
+        },
+        setCertification (state, action) {
+          state.certification = action.payload;
         }
     }
 });
@@ -59,7 +63,8 @@ export const {
     setEmail,
     setCountry,
     setState,
-    setConsent
+    setConsent,
+    setCertification
 } = appSlice.actions;
 
 export default appSlice.reducer;
