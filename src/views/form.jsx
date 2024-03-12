@@ -75,7 +75,7 @@ const SubmissionForm = () => {
             <Picker label='State' isRequired onSelectionChange={setState}>
                 <Item key='New York'>New york</Item>
             </Picker>
-            <Switch onChange={setConsent}>I consent to everything I am asked.</Switch>
+            <Switch onChange={setConsent}>I consent to these <a href='#'>terms and conditions</a>.</Switch>
             <Button variant='cta' width={'size-1200'} onPress={handleContinue}>
                 {isWorking ?
                     <ProgressCircle isIndeterminate/>
