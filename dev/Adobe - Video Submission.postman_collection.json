@@ -1,0 +1,243 @@
+{
+	"info": {
+		"_postman_id": "92fc541a-0f5d-4dca-b14a-71c4c8288805",
+		"name": "Adobe - Video Submission",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "9335506",
+		"_collection_link": "https://crimson-flare-265989.postman.co/workspace/Adobe-DMe-Workspace~c9f0b112-bd52-49ed-9b5f-302bee67feb1/collection/9335506-92fc541a-0f5d-4dca-b14a-71c4c8288805?action=share&source=collection_link&creator=9335506"
+	},
+	"item": [
+		{
+			"name": "Submit Form Draft",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var json = JSON.parse(responseBody)\r",
+							"\r",
+							"if(json.success){\r",
+							"    pm.collectionVariables.set(\"SUBMISSION_ID\", json.submissionId);\r",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "apikey",
+					"apikey": [
+						{
+							"key": "value",
+							"value": "{{API_Key}}",
+							"type": "string"
+						},
+						{
+							"key": "key",
+							"value": "X-API-Key",
+							"type": "string"
+						},
+						{
+							"key": "in",
+							"value": "header",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"action\": \"exp.draftSubmit\",\r\n    \"payload\": {\r\n        \"firstName\": \"John\",\r\n        \"lastName\": \"Doe\",\r\n        \"email\": \"john.doe@example.com\",\r\n        \"location\": {\r\n            \"country\": \"Canada\",\r\n            \"state\": \"Alberta\"\r\n        },\r\n        \"consent\": true\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{API_ROOT_URL}}",
+					"host": [
+						"{{API_ROOT_URL}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Request Upload URL",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var json = JSON.parse(responseBody)\r",
+							"\r",
+							"if(json.success){\r",
+							"    pm.collectionVariables.set(\"FILE_UPLOAD_URL\", json.uploadUrl);\r",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "apikey",
+					"apikey": [
+						{
+							"key": "value",
+							"value": "{{API_Key}}",
+							"type": "string"
+						},
+						{
+							"key": "key",
+							"value": "X-API-Key",
+							"type": "string"
+						},
+						{
+							"key": "in",
+							"value": "header",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"action\": \"exp.requestUrl\",\r\n    \"payload\": {\r\n        \"submissionId\": \"{{SUBMISSION_ID}}\",\r\n        \"file\": {\r\n            \"fileName\": \"test2.txt\",\r\n            \"contentType\": \"text/plain\"\r\n        }\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{API_ROOT_URL}}",
+					"host": [
+						"{{API_ROOT_URL}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upload File",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "x-ms-blob-type",
+						"value": "BlockBlob",
+						"type": "text"
+					},
+					{
+						"key": "x-ms-blob-content-type",
+						"value": "text/plain",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "file",
+					"file": {
+						"src": "/C:/Workspaces/Adobe/video-submit-client/test.txt"
+					}
+				},
+				"url": {
+					"raw": "{{FILE_UPLOAD_URL}}",
+					"host": [
+						"{{FILE_UPLOAD_URL}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Submit Final",
+			"request": {
+				"auth": {
+					"type": "apikey",
+					"apikey": [
+						{
+							"key": "value",
+							"value": "{{API_Key}}",
+							"type": "string"
+						},
+						{
+							"key": "key",
+							"value": "X-API-Key",
+							"type": "string"
+						},
+						{
+							"key": "in",
+							"value": "header",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"action\": \"exp.complete\",\r\n    \"payload\": {\r\n        \"submissionId\": \"{{SUBMISSION_ID}}\"\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{API_ROOT_URL}}",
+					"host": [
+						"{{API_ROOT_URL}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "API_Key",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "FILE_UPLOAD_URL",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "SUBMISSION_ID",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "API_ROOT_URL",
+			"value": "https://prod-34.westus.logic.azure.com:443/workflows/92719792277b4826877a49cff1b45212/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=JnK22DgLamXiUKmryslydNwGde81sciBxItBu1gDDmk",
+			"type": "string"
+		}
+	]
+}

@@ -18,12 +18,14 @@
 import axios from 'axios';
 import {PA_X_API_KEY, PA_ENDPPOINT} from '../utils/secrets';
 
-const requestData = {
-    "action": "exp.requestUrl",
-    "payload": null
-};
 
 export const initializeSubmission = async (params) => {
+    console.log(params);
+    const requestData = {
+        "action": "exp.draftSubmit",
+        "payload": null
+    };
+    
     requestData.payload = params;
     try {
         const requestConfig = {
@@ -37,6 +39,56 @@ export const initializeSubmission = async (params) => {
         return res;
 
     } catch (err) {
-        throw new Error(`Form Error: ${err.message}`);
+        throw new Error(err);
+    }
+};
+
+export const getSignedUrl = async (submissionId, file) => {
+    const requestData = {
+        "action": "exp.requestUrl",
+        "payload": {
+            "submissionId": submissionId,
+            "file": {
+                "fileName": file.name,
+                "contentType": file.type
+            }
+        }
+    }
+
+    const requestConfig = {
+        headers:{
+            'x-api-key': PA_X_API_KEY,
+            'content-type': 'application/json'
+        }
+    };
+    
+    try {
+        const res = await axios.post(PA_ENDPPOINT, requestData, requestConfig);
+        return res;
+    } catch (e) {
+        throw new Error(e);
+    }
+}
+
+export const completeSubmission = async (submissionId) => {
+    const requestData = {
+        "action": "exp.complete",
+        "payload": {
+            "submissionId": submissionId
+        }
+    }
+
+    const requestConfig = {
+        headers:{
+            'x-api-key': PA_X_API_KEY,
+            'content-type': 'application/json'
+        }
+    };
+
+    try {
+        const res = await axios.post(PA_ENDPPOINT, requestData, requestConfig);
+        return res;
+    } catch (e) {
+        throw new Error(e);
     }
 }

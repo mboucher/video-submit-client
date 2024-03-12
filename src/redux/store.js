@@ -17,11 +17,13 @@
 
 import { configureStore } from '@reduxjs/toolkit';
 import  appState from './app';
+import formState from './form';
 
 
 const store = configureStore({
     reducer: {
-        app: appState
+        app: appState,
+        form: formState
     }
 });
 
