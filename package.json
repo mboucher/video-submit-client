@@ -6,7 +6,8 @@
   "author": "Marcel Boucher <mboucher@adobe.com>",
   "license": "MIT",
   "scripts": {
-    "start": "parcel src/index.html --https --cert ./dev/certs/server.crt --key ./dev/certs/server.key --host localhost.corp.adobe.com -p 8443 --open"
+    "start": "parcel src/index.html --https --cert ./dev/certs/server.crt --key ./dev/certs/server.key --host localhost.corp.adobe.com -p 8443 --open",
+    "packageServer": "npm-build-zip --source server/mspa/dubbingvideosubmission --name mspasolution"
   },
   "dependencies": {
     "@adobe/react-spectrum": "^3.34.1",
@@ -22,6 +23,7 @@
     "react-router-dom": "^6.22.3"
   },
   "devDependencies": {
+    "npm-build-zip": "^1.0.4",
     "parcel": "^2.12.0",
     "parcel-bundler": "^1.12.5"
   }
