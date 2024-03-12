@@ -29,6 +29,7 @@ import GlobalNav from './components/nav-bar';
 import './styles.css';
 import SubmissionForm from './views/form';
 import DragAndDrop from './views/upload';
+import TermsAndCondDialog from './views/termsandcond';
 
 
 const App = () => {
@@ -49,6 +50,7 @@ const App = () => {
                         <View gridArea='content' min-height='100%'>
                             <Routes>
                                 <Route path="/" element={<SubmissionForm />} /> 
+                                <Route path="/terms" element={<TermsAndCondDialog />} /> 
                                 <Route path="/upload" element={<DragAndDrop/>} />
                             </Routes>
                         </View>
