@@ -314,3 +314,28 @@ export const countries = [
     {key: 'ZM', name: 'Zambia'},
     {key: 'ZW', name: 'Zimbabwe'}
 ];
+
+export const languages = [
+    {key: 'eng', name: 'English'},
+    {key: 'spa', name: 'Spanish'},
+    {key: 'deu', name: 'German'},
+    {key: 'fra', name: 'French'},
+    {key: 'por', name: 'Portuguese'},
+    {key: 'ita', name: 'Italian'},
+    {key: 'rus', name: 'Russian'},
+    {key: 'jpn', name: 'Japanese'},
+    {key: 'cmn', name: 'Mandarin'},
+    {key: 'yue', name: 'Cantonese'},
+    {key: 'kor', name: 'Korean'},
+    {key: 'hin', name: 'Hindi'},
+    {key: 'nor', name: 'Norwegian'},
+    {key: 'swe', name: 'Swedish'},
+    {key: 'dan', name: 'Danish'},
+    {key: 'nld', name: 'Dutch'},
+    {key: 'pol', name: 'Polish'},
+    {key: 'ara', name: 'Arabic'},
+    {key: 'tur', name: 'Turkish'},
+    {key: 'ind', name: 'Indonesian'},
+    {key: 'tam', name: 'Tamil'},
+    {key: 'tel', name: 'Telugu'}
+];

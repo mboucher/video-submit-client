@@ -14,15 +14,12 @@
  * is strictly forbidden unless prior written permission is obtained
  * from Adobe.
 **************************************************************************/
-import { Flex, TextField, Picker, Item, Button, Heading, Content, Divider, View, Switch, ProgressCircle, Text } from '@adobe/react-spectrum';
-import { Dialog, DialogTrigger } from '@adobe/react-spectrum'
-
-
+import { Flex, Button, Heading, Content, Divider, View, Switch, ProgressCircle, Text } from '@adobe/react-spectrum';
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from 'react-redux';
 import { initializeSubmission } from '../services/PAFlowService';
 import React, { useState, useEffect } from 'react';
-import {setFirstName, setLastName, setCertification, setCountry, setEmail, setState, setConsent} from '../redux/form';
+import {setConsent} from '../redux/form';
 
 import termsMd from '../content/termsandcond.md'
 
@@ -40,6 +37,7 @@ const TermsAndCondDialog = () => {
     const email = useSelector((state) => state.form.email);
     const country = useSelector((state) => state.form.location.country);
     const state = useSelector((state) => state.form.location.state);
+    const lang = useSelector((state) => state.form.lang);
     const certification = useSelector((state) => state.form.certification);
     const consent = useSelector((state) => state.form.consent);
 
@@ -81,6 +79,7 @@ const TermsAndCondDialog = () => {
                 //     country: country,
                 //     state: state
                 // },
+                lang: lang,
                 certification: certification,
                 consent: consent
             }

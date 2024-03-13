@@ -18,15 +18,13 @@
 import { Flex, TextField, Picker, Item, Button, Heading, View, Switch, ProgressCircle, Text, ContextualHelp, Content } from '@adobe/react-spectrum';
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from 'react-redux';
-import { initializeSubmission } from '../services/PAFlowService';
 import React, { useEffect, useState } from 'react';
 import { ToastQueue } from '@react-spectrum/toast';
-import { setCurrentPageName, setSignedUrl, setSubmissionId } from '../redux/app';
-import {setFirstName, setLastName, setCertification, setCountry, setEmail, setState} from '../redux/form';
-import { states, countries } from '../utils/data';
+import { setCurrentPageName } from '../redux/app';
+import {setFirstName, setLastName, setCertification, setCountry, setEmail, setState, setLang} from '../redux/form';
+import { states, countries, languages } from '../utils/data';
 
 import contentMd from '../content/contentrequest.md';
-
 
 const SubmissionForm = () => {
     const submissionId = useSelector((state) => state.app.submissionId);
@@ -36,6 +34,7 @@ const SubmissionForm = () => {
     const email = useSelector((state) => state.form.email);
     const country = useSelector((state) => state.form.location.country);
     const state = useSelector((state) => state.form.location.state);
+    const lang = useSelector((state) => state.form.lang);
     const certification = useSelector((state) => state.form.certification);
 
     const [content, setContent] = useState('');
@@ -109,6 +108,17 @@ const SubmissionForm = () => {
                             <ContextualHelp>
                               <Content>
                                 Submissions are not currently accepted in {disabledStateKeys.join(', ')}.
+                              </Content>
+                            </ContextualHelp>
+                          }
+                    >
+                        {(item) => <Item key={item.id}>{item.name}</Item>}
+                    </Picker>
+                    <Picker label='Video Language' isRequired onSelectionChange={(val) => dispatch(setLang(val))} items={languages} defaultSelectedKey={lang}
+                        contextualHelp={
+                            <ContextualHelp>
+                              <Content>
+                                What language will you use to record the video? Please select a supported language.
                               </Content>
                             </ContextualHelp>
                           }
