@@ -77,6 +77,9 @@
                     "consent": {
                       "type": "boolean"
                     },
+                    "certification": {
+                      "type": "boolean"
+                    },
                     "file": {
                       "type": "object",
                       "properties": {
@@ -240,19 +243,13 @@
                       },
                       {
                         "equals": [
-                          "@contains(variables('validations'), triggerBody()?['payload']?['location']?['country'])",
-                          "@false"
-                        ]
-                      },
-                      {
-                        "equals": [
-                          "@contains(variables('validations'), triggerBody()?['payload']?['location']?['state'])",
-                          "@false"
-                        ]
-                      },
-                      {
-                        "equals": [
                           "@contains(variables('validations'), triggerBody()?['payload']?['consent'])",
+                          "@false"
+                        ]
+                      },
+                      {
+                        "equals": [
+                          "@contains(variables('validations'), triggerBody()?['payload']?['certification'])",
                           "@false"
                         ]
                       }
@@ -265,7 +262,7 @@
                 },
                 "Add_a_row_into_a_table": {
                   "runAfter": {
-                    "Validate_Draft_Payload": [
+                    "Set_submissionId": [
                       "Succeeded"
                     ]
                   },
@@ -284,9 +281,9 @@
                       "item/First Name": "@triggerBody()?['payload']?['firstName']",
                       "item/Last Name": "@triggerBody()?['payload']?['lastName']",
                       "item/Email": "@triggerBody()?['payload']?['email']",
-                      "item/Country": "@triggerBody()?['payload']?['location']?['country']",
-                      "item/State or Province": "@triggerBody()?['payload']?['location']?['state']",
                       "item/Consent": "@triggerBody()?['payload']?['consent']",
+                      "item/Certification": "@{triggerBody()?['payload']?['certification']}",
+                      "item/Submission DateTime": "@variables('now')",
                       "item/Submission ID": "@variables('submissionId')",
                       "item/Asset Link": "@{concat('https://exioffstrainingdata.blob.core.windows.net/videoapi/', triggerBody()?['payload']?['email'])}",
                       "item/Status": "@triggerBody()?['action']"
@@ -318,6 +315,18 @@
                       "success": true,
                       "submissionId": "@{variables('submissionId')}"
                     }
+                  }
+                },
+                "Set_submissionId": {
+                  "runAfter": {
+                    "Validate_Draft_Payload": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "submissionId",
+                    "value": "@{base64(concat(triggerBody()?['payload']?['email'], variables('now')))}"
                   }
                 }
               }
@@ -652,22 +661,35 @@
             ]
           }
         },
-        "Initialize_submissionId": {
+        "Initialize_now_(time)": {
           "runAfter": {
             "Initialize_validator": [
               "Succeeded"
             ]
           },
-          "metadata": {
-            "operationMetadataId": "e0835575-2646-4e75-b0dc-d995d85d2024"
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "now",
+                "type": "string",
+                "value": "@{utcNow()}"
+              }
+            ]
+          }
+        },
+        "Initialize_submissionId": {
+          "runAfter": {
+            "Initialize_now_(time)": [
+              "Succeeded"
+            ]
           },
           "type": "InitializeVariable",
           "inputs": {
             "variables": [
               {
                 "name": "submissionId",
-                "type": "string",
-                "value": "@{base64(concat(triggerBody()?['payload']?['email'], utcNow()))}"
+                "type": "string"
               }
             ]
           }
