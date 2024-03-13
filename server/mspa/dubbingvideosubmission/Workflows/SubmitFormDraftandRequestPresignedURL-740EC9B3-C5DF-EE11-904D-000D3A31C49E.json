@@ -74,6 +74,9 @@
                         }
                       }
                     },
+                    "lang": {
+                      "type": "string"
+                    },
                     "consent": {
                       "type": "boolean"
                     },
@@ -252,6 +255,12 @@
                           "@contains(variables('validations'), triggerBody()?['payload']?['certification'])",
                           "@false"
                         ]
+                      },
+                      {
+                        "equals": [
+                          "@contains(variables('validations'), triggerBody()?['payload']?['lang'])",
+                          "@false"
+                        ]
                       }
                     ]
                   },
@@ -281,6 +290,7 @@
                       "item/First Name": "@triggerBody()?['payload']?['firstName']",
                       "item/Last Name": "@triggerBody()?['payload']?['lastName']",
                       "item/Email": "@triggerBody()?['payload']?['email']",
+                      "item/Video Language": "@triggerBody()?['payload']?['lang']",
                       "item/Consent": "@triggerBody()?['payload']?['consent']",
                       "item/Certification": "@{triggerBody()?['payload']?['certification']}",
                       "item/Submission DateTime": "@variables('now')",
