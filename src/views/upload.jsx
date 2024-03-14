@@ -36,7 +36,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { setCurrentPageName, setSignedUrl, setSubmissionId } from '../redux/app';
 import {setConsent, setCertification} from '../redux/form';
 import { completeSubmission, getSignedUrl } from '../services/PAFlowService';
-import ThankYou from '../../public/ThankYou.svg';
+import ThankYou from '../public/ThankYou.svg';
 
 const DragAndDrop = () => {
     const signedUrl = useSelector((state) => state.app.signedUrl);
