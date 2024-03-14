@@ -24,8 +24,6 @@ import { setCurrentPageName } from '../redux/app';
 import {setFirstName, setLastName, setCertification, setCountry, setEmail, setState, setLang} from '../redux/form';
 import { states, countries, languages } from '../utils/data';
 
-import contentMd from '../content/contentrequest.md';
-
 const SubmissionForm = () => {
     const submissionId = useSelector((state) => state.app.submissionId);
 
@@ -47,15 +45,6 @@ const SubmissionForm = () => {
 
     const disabledStateKeys = ['IL', 'TX'];
 
-    useEffect(() =>{
-        dispatch(setCurrentPageName('Video Submission Form'))
-
-        fetch(contentMd).then((response) => response.text()).then((text) => {
-            setContent(text)
-        })
-    },[]);
-
-
     const validateFields = () => {
         if(firstName === null || lastName === null || email === null || country === null || state === null || !certification) {
             ToastQueue.negative('All fields and certification are required.', {timeout:5000});
@@ -64,7 +53,6 @@ const SubmissionForm = () => {
             return true;
         }
     }
-
 
     const handleContinue = async () => {
         
@@ -83,9 +71,6 @@ const SubmissionForm = () => {
         <View padding={'size-400'} width={'100%'}>
             <Flex direction={'column'} width={'100%'} alignItems={'center'}>
             <Flex direction={'column'} gap={'size-250'} width={'40%'}>
-                <Text>
-                    <div dangerouslySetInnerHTML={{ __html: content }} />
-                </Text>
                 <Heading>Enter your information</Heading>
                 <Flex direction={'row'} wrap gap={'size-100'}>
                     <TextField label='First Name' isRequired onChange={(val) => dispatch(setFirstName(val))} defaultValue={firstName}></TextField>
@@ -100,14 +85,14 @@ const SubmissionForm = () => {
                           }
                     
                     ></TextField>
-                    <Picker label='Country' isRequired onSelectionChange={(val) => dispatch(setCountry(val))} items={countries} defaultSelectedKey={country}>
+                    <Picker label='Country' isRequired isDisabled onSelectionChange={(val) => dispatch(setCountry(val))} items={countries} defaultSelectedKey={country}>
                         {(item) => <Item key={item.id}>{item.name}</Item>}
                     </Picker>
                     <Picker label='State' isRequired onSelectionChange={(val) => dispatch(setState(val))} items={states} defaultSelectedKey={state} disabledKeys={disabledStateKeys}
                         contextualHelp={
                             <ContextualHelp>
                               <Content>
-                                Submissions are not currently accepted in {disabledStateKeys.join(', ')}.
+                                Submissions are not currently accepted in {disabledStateKeys.join(', ')}. Thank you for your interest.
                               </Content>
                             </ContextualHelp>
                           }
