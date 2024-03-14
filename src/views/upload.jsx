@@ -86,7 +86,7 @@ const DragAndDrop = () => {
         dispatch(setConsent(false));
         dispatch(setCertification(false));
 
-        navigate('/');     
+        navigate('/collect');     
     }
 
     const onProgressEvent = async (progressEvent) => {
@@ -105,7 +105,9 @@ const DragAndDrop = () => {
                 <Flex direction={'column'} alignItems={'center'}>
                     <Image src={ThankYou} width={'50%'}/>
                     <Heading level={1}>Your file has been successfully saved.</Heading>
-                    <Button variant='cta' onPress={goHome}>Submit another file</Button>
+                    <Button variant='cta' onPress={goHome}>
+                        <Text>Submit another file</Text>
+                    </Button>
                 </Flex>
             
             :
