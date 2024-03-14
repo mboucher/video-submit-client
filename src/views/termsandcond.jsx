@@ -124,7 +124,7 @@ const TermsAndCondDialog = () => {
                         {isWorking ?
                             <ProgressCircle isIndeterminate />
                             :
-                            <Text>Continue</Text>
+                            <Text>I Consent</Text>
                         }
                     </Button>
                 </Flex>

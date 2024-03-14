@@ -30,6 +30,7 @@ import './styles.css';
 import SubmissionForm from './views/form';
 import DragAndDrop from './views/upload';
 import TermsAndCondDialog from './views/termsandcond';
+import Intro from './views/intro';
 
 
 const App = () => {
@@ -49,7 +50,8 @@ const App = () => {
                         </View>
                         <View gridArea='content' min-height='100%'>
                             <Routes>
-                                <Route path="/" element={<SubmissionForm />} /> 
+                                <Route path="/" element={<Intro />} /> 
+                                <Route path="/collect" element={<SubmissionForm />} /> 
                                 <Route path="/terms" element={<TermsAndCondDialog />} /> 
                                 <Route path="/upload" element={<DragAndDrop/>} />
                             </Routes>
